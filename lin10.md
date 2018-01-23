@@ -16,7 +16,7 @@ language facts (demographics, location, etc.) important linguistic
 characteristics (orthography, morphology, syntax) and computational efforts 
 such as resources, tools, papers. For instance,  how many entries are there
 about the language in the [MT Archive](http://www.mt-archive.info/) 
-and what are they generally about? Be creative and have fun. 
+and what are they generally about? Which parallel corpora are available between the language and English? What other linguistic resources and tools are available that could aid machine translation? Be creative and have fun. 
 Asking for help from native speakers or language experts is great.
 But you are ultimately responsible for the presentation.
 
