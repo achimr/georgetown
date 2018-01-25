@@ -9,6 +9,10 @@ title: Statistical Machine Translation (LING-462/COSC-482)
 Homework2: Alignment
 ====================
 
+Due February 8, 2018
+
+Please submit your alignment code and a report answering the questions below.
+
 Word alignment is a fundamental problem in machine translation. The input is 
 a large _parallel text_ of translated sentences. For example, our
 parallel text might contain the following translation:
@@ -45,8 +49,8 @@ and data, run:
 
     git clone https://github.com/achimr/dreamt-gt.git
 
-In the new `dreamt/aligner` directory you will find a python program 
-called `align.py`, which contains a complete but very simple alignment 
+In the new `dreamt-gt/aligner` directory you will find a python program 
+called `align`, which contains a complete but very simple alignment 
 algorithm based on the intuition that English and German words which 
 frequently appear together are likely to be translations of each other. 
 So for every word, 
@@ -65,7 +69,7 @@ they appear together. Dice's coefficient $\delta(e,f)$ is then:
 By default, the aligner guesses that $e$ and $f$ are aligned if
 $\delta(e,f) > 0.5$. Run it on 200 sentences:
 
-    python align.py -n 200 > dice200.out
+    python align -n 200 > dice200.out
 
 For each sentence, it generates pairs of numbers on a line, one per 
 alignment link. For our example alignment above, this would be:
@@ -90,27 +94,27 @@ recall.
 
 To compute precision, recall, and AER, run:
 
-    python score-alignments.py < dice200.out
+    python score-alignments < dice200.out
 
 In addition to these numbers, you'll also see the guessed, sure, and probable
 alignments. The guessed alignments are terrible! They're so noisy that it's
 difficult to see what the human alignment look like. You can look at the 
 human alignments without this noise by feeding empty alignments to
-`score-alignments.py`:
+`score-alignments`:
 
-    yes "" | head -150 | python score-alignments.py
+    yes "" | head -150 | python score-alignments
 
 __Question 1.__ What regularities do you observe in the human alignments?
 
 Do you think the automatic alignments will improve if you use more data?
 Try it:
 
-    python align.py -n 2000 | python score-alignments.py -n 0
+    python align -n 2000 | python score-alignments -n 0
 
 __Question 2.__ What happens when you use different amounts of data? Why do
 you think this happens?
 
-__Question 3.__ Vary the threshold using the <code>-t</code> option to <code>score-alignments.py</code>. 
+__Question 3.__ Vary the threshold using the <code>-t</code> option to <code>score-alignments</code>. 
 How are precision, recall, and AER affected?
 
 __Question 4.__ Do the automatic alignments reflect the regularities you
