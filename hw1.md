@@ -43,7 +43,7 @@ Getting started
 You must have `git` and `python2.7`. Please see the section _Computing environment_ in the syllabus. To get the code
 and data, run:
 
-    git clone https://github.com/alopez/dreamt.git
+    git clone https://github.com/achimr/dreamt-gt.git
 
 In the new `dreamt/aligner` directory you will find a python program 
 called `align.py`, which contains a complete but very simple alignment 
