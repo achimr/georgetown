@@ -1,5 +1,5 @@
 Welcome to LING-462/COSC-482 Statistical Machine Translation (Spring
-2018)!
+2018)\!
 
 ### Summary
 
@@ -9,11 +9,11 @@ is more active than ever. In this course we explore the data-driven
 approaches to translate human language with computers that supplanted
 rule-based approaches in the past quarter century. First, we lay
 foundations for the course with statistical NLP relevant to MT and
-corpus preparation. Next, we start exploring statistical MT (SMT) --
-from word-based models to phrase-based models to tree-based models. We
-will then cover domain-adaptation, incremental learning and how to
-integrate linguistic information. We will learn how to evaluate system
-output with automatic and human evaluation methods.
+corpus preparation. Next, we start exploring statistical MT (SMT) – from
+word-based models to phrase-based models to tree-based models. We will
+then cover domain-adaptation, incremental learning and how to integrate
+linguistic information. We will learn how to evaluate system output with
+automatic and human evaluation methods.
 
 Recently, deep learning-based approaches have proven to produce superior
 translation quality compared to SMT. We will investigate the current
@@ -28,12 +28,12 @@ for the most common applications.
 
 ### Lectures
 
-Thu 3:30pm - 6:00pm\
+Thu 3:30pm - 6:00pm  
 White-Gravenor 206
 
 ### Instructor
 
-Achim Ruopp\
+Achim Ruopp  
 E-Mail: achim.ruopp(at)georgetown.edu
 
 ### Office hours
@@ -48,30 +48,29 @@ LING-362: Intro to NLP; COSC/LING-272: Algorithms for NLP;
 COSC/LING-572: Empirical Methods in Natural Language Processing or
 permission of instructor)
 
-Course requirements and final grade breakdown
-=============================================
+# Course requirements and final grade breakdown
 
-  ------------------------------------------------ -----
-  Attendance                                       
-  Homework assignments                             60%
-  Final exam                                       30%
-  In-class presentation: Language in ten minutes   10%
-  ------------------------------------------------ -----
+|                                                |     |
+| ---------------------------------------------- | --- |
+| Attendance                                     |     |
+| Homework assignments                           | 60% |
+| Final exam                                     | 30% |
+| In-class presentation: Language in ten minutes | 10% |
 
 ### Homework assignments
 
-With exception of the homework assignments "Quality of Machine
-Translation" and "Post-editing" you can work independently or in groups
+With exception of the homework assignments “Quality of Machine
+Translation” and “Post-editing” you can work independently or in groups
 of up to two, under these conditions:
 
--   You must announce the group publicly on Canvas.
--   Your group must be interdisciplinary (i.e. contain students with a
+  - You must announce the group publicly on Canvas.
+  - Your group must be interdisciplinary (i.e. contain students with a
     linguistics background and students with a computer science
     background)
--   You agree that everyone in the group will receive the same grade on
+  - You agree that everyone in the group will receive the same grade on
     the assignment.
--   You can add people or merge groups at any time before the assignment
-    is due. **You cannot drop people from your group once you've added
+  - You can add people or merge groups at any time before the assignment
+    is due. **You cannot drop people from your group once you’ve added
     them.** We encourage collaboration, but we will not adjudicate who
     did or did not contribute.
 
@@ -81,8 +80,8 @@ Adapted from <http://mt-class.org/jhu>
 
 How are you going to build a machine translation system unless you know
 at least a little bit about language? You will be required to give a
-short presentation (\~10 minutes) on a particular language, e.g.,
-Arabic, Chinese, Czech, Hindi, Italian, or Maltese.
+short presentation (~10 minutes) on a particular language, e.g., Arabic,
+Chinese, Czech, Hindi, Italian, or Maltese.
 
 The language must not be your first native tongue. If you are fluent or
 very familiar with the language we encourage you to pick one that you
@@ -103,16 +102,16 @@ responsible for the presentation.
 [Nizar Habash](http://www.nizarhabash.com/) inspired this assignment.
 For inspiration, check out:
 
--   [Examples from Nizar's
+  - [Examples from Nizar’s
     class](https://sites.google.com/site/comse6998machinetranslation/language-in-10-minutes)
--   [Ethnologue](http://www.ethnologue.com/)
--   [Omniglot](http://www.omniglot.com/)
--   [About World Languages](http://www.aboutworldlanguages.com/)
--   [Machine Translation Archive](http://www.mt-archive.info/)
--   [World Atlas of Language Structures](http://wals.info/)
+  - [Ethnologue](http://www.ethnologue.com/)
+  - [Omniglot](http://www.omniglot.com/)
+  - [About World Languages](http://www.aboutworldlanguages.com/)
+  - [Machine Translation Archive](http://www.mt-archive.info/)
+  - [World Atlas of Language Structures](http://wals.info/)
 
 We will grade on clarity and detail. Did you learn something really
-cool? Tell us!
+cool? Tell us\!
 
 Adapted from <http://mt-class.org/jhu>
 
@@ -123,10 +122,10 @@ Koehn (Cambridge University Press, ISBN-10: 0521874157, ISBN-13:
 978-0521874151) which is available
 [online](https://gt-summon-serialssolutions-com.proxy.library.georgetown.edu/#!/search?bookMark=ePnHCXMwhZ3PDoIwDMZJ9ODfV0DUkwcPMgl6NhofwHszIxIjEMMW4-P7dQUkxsTzflmAkbZb228Db6y5NruwroeLG5ux7pyMgavriOINXMaGPRkXY3A2NtzClK579dEIh_GA-t6EAy6nV6yzIHfFhUlg2YZLndjI6xbYqA09_7A_7Y7L1FJSVqfehs4IxsNIxdyQsxBAmztMB8yKNfTMXDrSEKs-rVgmjL012KmwRl-xW6UWo_CzxgiAwMyFqa03uamqckqK4PfaFHxQqfPLLXXXgDxERYJCIIpvVZgJJXniZti-LHGaFi_Bkob-T6gFNLN8eqca7PuBJCHbDLslqZYoVn-_5hur9Y4y)
 through the Georgetown University library (identified in the assigned
-reading as \"Koehn SMT\"). We will also use book Neural Machine
+reading as "Koehn SMT"). We will also use book Neural Machine
 Translation (3rd draft) by Philipp Koehn available
 [here](http://mt-class.org/jhu/assets/nmt-book.pdf) (identified in the
-assigned reading as \"Koehn NMT\"). Other reading materials are provided
+assigned reading as "Koehn NMT"). Other reading materials are provided
 as links in the course plan.
 
 ### Communication
