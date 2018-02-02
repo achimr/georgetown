@@ -1,60 +1,154 @@
----
-layout: default
-img: cover
-img_link: http://www.statmt.org/book/
-title: Statistical Machine Translation
-active_tab: main_page 
----
+Welcome to LING-462/COSC-482 Statistical Machine Translation (Spring
+2018)!
 
-EN 600.468/668 Machine Translation
-: Fall 2017
-: Tuesdays and Thursdays 1:30-2:45
-: [Mergenthaler	111](http://webapps.jhu.edu/jhuniverse/information_about_hopkins/visitor_information/how_to_get_here/homewood_campus/pdf/homewood_campus_map.pdf)
-: [Computer Science Department](http://www.cs.jhu.edu/)
-: [Johns Hopkins University](http://www.jhu.edu/)
+### Summary
 
-[Google translate](http://translate.google.com/) instantly
-translates between any pair of over eighty human languages 
-like French and English. How does it do that? Why does it 
-make the errors that it does? And how can you build something 
-better? Modern translation systems like Google Translate and 
-[Bing Translator](http://www.microsofttranslator.com/)
-*learn* to translate by reading millions of words of already 
-translated text. This course will show you how they work. 
-We cover fundamental building blocks from linguistics, 
-machine learning (especially deep learning), algorithms, and data structures, 
-showing how they apply to a difficult
-real-word artificial intelligence problem.
+After more than 60 years since Machine Translation (MT) research started
+at Georgetown, this area of Natural Language Processing (NLP) research
+is more active than ever. In this course we explore the data-driven
+approaches to translate human language with computers that supplanted
+rule-based approaches in the past quarter century. First, we lay
+foundations for the course with statistical NLP relevant to MT and
+corpus preparation. Next, we start exploring statistical MT (SMT) --
+from word-based models to phrase-based models to tree-based models. We
+will then cover domain-adaptation, incremental learning and how to
+integrate linguistic information. We will learn how to evaluate system
+output with automatic and human evaluation methods.
 
+Recently, deep learning-based approaches have proven to produce superior
+translation quality compared to SMT. We will investigate the current
+state-of-the-art in neural MT (NMT) and contrast its strength and
+weaknesses with SMT.
 
-Instructor
-: [Philipp Koehn](http://www.cs.jhu.edu/~phi/) (<phi@jhu.edu>)
+Machine translation does not exist in a vacuum; it is now used to
+provide draft translations for human translators and is embedded in
+other NLP systems. With better quality, raw MT is increasingly used in
+in written and spoken human communication. We study the adaptation of MT
+for the most common applications.
 
-TA
-: Shuoyang Ding (<dings@jhu.edu>)
+### Lectures
 
-Office hours
-: **Professor**
-* By Appointment
-: **TA**
-* Tuesday at 14:45--15:30, Mergenthaler 111
-* Friday at (After Oct. 5th) 13:30--14:30, Malone 338
+Thu 3:30pm - 6:00pm\
+White-Gravenor 206
 
-Discussion Forum
-: [Piazza](https://piazza.com/jhu/fall2017/en600468/home)
+### Instructor
 
-Textbook
-: [Statistical Machine Translation](http://www.statmt.org/book/) (<a href="http://statmt.org/book/errata.html">errata</a>) 
-by [Philipp Koehn](http://www.cs.jhu.edu/~phi/).
-You can read it online through the <a href="https://catalyst.library.jhu.edu/catalog/bib_3522360">JHU library</a> or 
-purchase from <a href="http://www.amazon.com/Statistical-Machine-Translation-Philipp-Koehn/dp/0521874157">Amazon</a>.
+Achim Ruopp\
+E-Mail: achim.ruopp(at)georgetown.edu
 
-Grading
-: To understand how machine translation works, you will build a translation system.
-We will mainly grade hands-on work.
+### Office hours
 
-* Five homework assignments (12% each)
-* Final project (30%)
-* In-class presentation: Language in ten minutes (10%)
+Thursday, 1pm-2pm, adjunct office of the Linguistics Dept. in Poulton
+Hall
 
-Late penalty for homework assignments: 10% per day.
+### Course prerequisites
+
+Basic Python programming skills are required (for example satisfied by
+LING-362: Intro to NLP; COSC/LING-272: Algorithms for NLP;
+COSC/LING-572: Empirical Methods in Natural Language Processing or
+permission of instructor)
+
+Course requirements and final grade breakdown
+=============================================
+
+  ------------------------------------------------ -----
+  Attendance                                       
+  Homework assignments                             60%
+  Final exam                                       30%
+  In-class presentation: Language in ten minutes   10%
+  ------------------------------------------------ -----
+
+### Homework assignments
+
+With exception of the homework assignments "Quality of Machine
+Translation" and "Post-editing" you can work independently or in groups
+of up to two, under these conditions:
+
+-   You must announce the group publicly on Canvas.
+-   Your group must be interdisciplinary (i.e. contain students with a
+    linguistics background and students with a computer science
+    background)
+-   You agree that everyone in the group will receive the same grade on
+    the assignment.
+-   You can add people or merge groups at any time before the assignment
+    is due. **You cannot drop people from your group once you've added
+    them.** We encourage collaboration, but we will not adjudicate who
+    did or did not contribute.
+
+Adapted from <http://mt-class.org/jhu>
+
+### In-class presentation: Language in ten minutes
+
+How are you going to build a machine translation system unless you know
+at least a little bit about language? You will be required to give a
+short presentation (\~10 minutes) on a particular language, e.g.,
+Arabic, Chinese, Czech, Hindi, Italian, or Maltese.
+
+The language must not be your first native tongue. If you are fluent or
+very familiar with the language we encourage you to pick one that you
+are not so familiar with. The language cannot be English.
+
+You should prepare three to six slides for your presentation, covering
+language facts (demographics, location, etc.) important linguistic
+characteristics (orthography, morphology, syntax) and computational
+efforts such as resources, tools, papers. For instance, how many entries
+are there about the language in the [MT
+Archive](http://www.mt-archive.info/) and what are they generally about?
+Which parallel corpora are available between the language and English?
+What other linguistic resources and tools are available that could aid
+machine translation? Be creative and have fun. Asking for help from
+native speakers or language experts is great. But you are ultimately
+responsible for the presentation.
+
+[Nizar Habash](http://www.nizarhabash.com/) inspired this assignment.
+For inspiration, check out:
+
+-   [Examples from Nizar's
+    class](https://sites.google.com/site/comse6998machinetranslation/language-in-10-minutes)
+-   [Ethnologue](http://www.ethnologue.com/)
+-   [Omniglot](http://www.omniglot.com/)
+-   [About World Languages](http://www.aboutworldlanguages.com/)
+-   [Machine Translation Archive](http://www.mt-archive.info/)
+-   [World Atlas of Language Structures](http://wals.info/)
+
+We will grade on clarity and detail. Did you learn something really
+cool? Tell us!
+
+Adapted from <http://mt-class.org/jhu>
+
+### Textbooks
+
+We will use the textbook Statistical Machine Translation by Philipp
+Koehn (Cambridge University Press, ISBN-10: 0521874157, ISBN-13:
+978-0521874151) which is available
+[online](https://gt-summon-serialssolutions-com.proxy.library.georgetown.edu/#!/search?bookMark=ePnHCXMwhZ3PDoIwDMZJ9ODfV0DUkwcPMgl6NhofwHszIxIjEMMW4-P7dQUkxsTzflmAkbZb228Db6y5NruwroeLG5ux7pyMgavriOINXMaGPRkXY3A2NtzClK579dEIh_GA-t6EAy6nV6yzIHfFhUlg2YZLndjI6xbYqA09_7A_7Y7L1FJSVqfehs4IxsNIxdyQsxBAmztMB8yKNfTMXDrSEKs-rVgmjL012KmwRl-xW6UWo_CzxgiAwMyFqa03uamqckqK4PfaFHxQqfPLLXXXgDxERYJCIIpvVZgJJXniZti-LHGaFi_Bkob-T6gFNLN8eqca7PuBJCHbDLslqZYoVn-_5hur9Y4y)
+through the Georgetown University library (identified in the assigned
+reading as \"Koehn SMT\"). We will also use book Neural Machine
+Translation (3rd draft) by Philipp Koehn available
+[here](http://mt-class.org/jhu/assets/nmt-book.pdf) (identified in the
+assigned reading as \"Koehn NMT\"). Other reading materials are provided
+as links in the course plan.
+
+### Communication
+
+The Canvas platform will be used to host the public syllabus and content
+accessible only to members of the course. It provides a discussion
+forum, a way to submit coursework, and other tools. Log into Canvas at
+[https://georgetown.instructure.com/](/) using your NetID. Students are
+automatically added when they are enrolled in the course.
+
+The Canvas discussion forum is the recommended virtual venue for asking
+and answering course-related questions. Instructors will monitor the
+forum and post replies from time to time, but we cannot promise
+immediate attention to every question.
+
+The most direct way to contact instructors is through email.
+
+### Computing environment
+
+Described on the [Computing
+Environment](computing.md) page.
+
+### Public course calendar
+
+[Public Calendar](https://calendar.google.com/calendar/embed?src=georgetown.edu_5bns8eudb01bn81dcs9sh6pqf8%40group.calendar.google.com&ctz=America%2FNew_York); For students: in case of any conflicting dates/calendar contents the calendar for the class on Canvas takes precedence
