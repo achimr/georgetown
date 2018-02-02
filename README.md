@@ -12,6 +12,7 @@ You are free to reuse it any way you like if you acknowledge that you got it fro
 * [Matt Post](http://www.cs.jhu.edu/~post/)
 * [Chris Callison-Burch](http://www.cis.upenn.edu/~ccb/)
 * [Philipp Koehn](http://www.cs.jhu.edu/~phi/)
+* [Chris Dyer](http://www.cs.cmu.edu/~cdyer/)
 
 Homework Assignments
 --------------------
