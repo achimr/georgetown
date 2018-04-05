@@ -150,4 +150,4 @@ Environment](computing.md) page.
 
 ### Public course calendar
 
-[Public Calendar](https://calendar.google.com/calendar/embed?src=georgetown.edu_5bns8eudb01bn81dcs9sh6pqf8%40group.calendar.google.com&ctz=America%2FNew_York); For students: in case of any conflicting dates/calendar contents the calendar for the class on Canvas takes precedence
+[Public Calendar](https://calendar.google.com/calendar/embed?src=bujn3hb484s0heu4ient9rf26l3gq1aa%40import.calendar.google.com&ctz=America%2FNew_York); For students: in case of any conflicting dates/calendar contents the calendar for the class on Canvas takes precedence
