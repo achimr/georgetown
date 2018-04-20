@@ -30,6 +30,10 @@ for the most common applications.
 
 Thu 3:30pm - 6:00pm
 
+### Calendar
+
+[Public Calendar](https://calendar.google.com/calendar/embed?src=bujn3hb484s0heu4ient9rf26l3gq1aa%40import.calendar.google.com&ctz=America%2FNew_York); For students: in case of any conflicting dates/calendar contents the calendar for the class on Canvas takes precedence
+
 ### Instructor
 
 Achim Ruopp\
