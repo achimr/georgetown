@@ -1,483 +1,362 @@
 ---
 layout: default
-img: voynich
-img_link: http://en.wikipedia.org/wiki/Voynich_manuscript 
-caption: The Voynich manuscript
+img: rosetta
+img_link: http://en.wikipedia.org/wiki/Rosetta_Stone
+caption: Rosetta stone (credit&#58; flickr user calotype46)
 title: Statistical Machine Translation (LING-462/COSC-482)
 ---
 
-Howework 3: Decoding 
+Homework2: Alignment
 ====================
 
-Due February 23rd, 2018
+Due February 8, 2018
 
-Please submit your decoding code and a report answering the questions below.
+Please submit your alignment code and a report answering the questions below.
 
-Decoding is process of taking input in French:
+Word alignment is a fundamental problem in machine translation. The input is 
+a large _parallel text_ of translated sentences. For example, our
+parallel text might contain the following translation:
 
-<p class="text-center">
-<em>honorables s&eacute;nateurs , que se est - il pass&eacute; ici , mardi dernier ?</em>
-</p>
+    Das Parlament erhebt sich zu einer Schweigeminute .  
+    The House rose and observed a minute 's silence .
 
-...And finding its best English translation under your  model:
+Your task is to align the words of the sentences. Given the sentence pair
+above, you would ideally produce an alignment containing these pairs:
 
-<p class="text-center">
-<em>honourable senators , what happened here last Tuesday ?</em>
-</p>
+| German            | | English                |
+|-------------------|-|------------------------|
+| 0. Das            | | 0. The                 |
+| 1. Parlament      | | 1. House               |
+| 2. erhebt         | | 2. rose                |
+| 3. sich           | | 2. rose                |
+| 5. einer          | | 5. a                   |
+| 6. Schweigeminute | | 6. minute              |
+| 6. Schweigeminute | | 7. 's                  |
+| 6. Schweigeminute | | 8. silence             |
+| 7. .              | | 9. .                   |
 
-To decode, we need a model of English sentences conditioned on the
-French sentence. You did most of the work of creating
-such a model in [Homework 2](https://georgetown.instructure.com/courses/56464/assignments/118051). In this homework,
-we will give you some French sentences and a probabilistic model consisting of
-a phrase-based translation model $p_{\textrm{TM}}(\textbf{f},\textbf{a}\mid{} \textbf{e})$
-and an n-gram language model $p_{\textrm{LM}}(\textbf{e})$. We will 
-assume a noisy channel decomposition and our goal will be to 
-solve the following *decision function*.
+Notice that some words, like _observed_, are not aligned, while other words,
+like <em>rose</em>, are multiply aligned. In some cases, the aligned words will not
+even be in the same order. In other cases, bilingual speakers won't even 
+agree on the correct alignment of a translation---for example, some 
+might align _zu_ to _rose_. These phenomena make word alignment challenging.
 
-<p class="text-center">
-$$\begin{align*} \textbf{e}^* & = \arg \max_{\textbf{e}} p(\textbf{e} \mid \textbf{f}) \\ & = \arg \max_{\textbf{e}} \frac{p_{\textrm{TM}}(\textbf{f} \mid \textbf{e}) \times p_{\textrm{LM}}(\textbf{e})}{p(\textbf{f})} \\ &= \arg \max_{\textbf{e}} p_{\textrm{TM}}(\textbf{f} \mid \textbf{e}) \times p_{\textrm{LM}}(\textbf{e}) \\ &= \arg \max_{\textbf{e}} \sum_{\textbf{a}} p_{\textrm{TM}}(\textbf{f},\textbf{a} \mid \textbf{e}) \times p_{\textrm{LM}}(\textbf{e}) \end{align*}$$
-</p>
-
-Since multiplying many small probabilities together can lead to numerical
-underflow, we'll work in logspace using the equivalent 
-decision function:
-
-<p class="text-center">
-$$\textbf{e}^* = \arg \max_{\textbf{e}} \log\left( \sum_{\textbf{a}} p_{\textrm{TM}}(\textbf{f},\textbf{a} \mid \textbf{e}) \times p_{\textrm{LM}}(\textbf{e}) \right) $$
-</p>
-
-We will keep the model fixed for this homework. Your goal will be to 
-write a program that, given an input French sentence, attempts to find its most 
-probable English translation under this model using this decision function. 
-
-
-Getting Started
+Getting started
 ---------------
 
-If you don't already have the code, get a fresh copy:
+You must have `git` and `python2.7`. Please see the section _Computing environment_ in the syllabus. To get the code
+and data, run:
 
     git clone https://github.com/achimr/dreamt-gt.git
 
-Under the new `decoder` directory, you now have simple decoder
-and some data files. Take a look at the input French, from a
-speech in the Canadian parliament:
+In the new `dreamt-gt/aligner` directory you will find a python program 
+called `align`, which contains a complete but very simple alignment 
+algorithm based on the intuition that English and German words which 
+frequently appear together are likely to be translations of each other. 
+So for every word, 
+our aligner computes the set of sentences that the word appears in. Then 
+for every pair of English and German words, it computes the similarity of 
+their corresponding sets, and it aligns those pairs with similarity higher 
+than a threshold. The aligner computes sentence similarity with 
+[Dice's coefficient](http://en.wikipedia.org/wiki/Dice's_coefficient/). 
+More formally, for an English word $e$ and French word $f$, let $C(e)$
+and $C(f)$ count the number of sentences in which they (respectively) 
+appear, and $C(e,f)$ count the number of sentences in which
+they appear together. Dice's coefficient $\delta(e,f)$ is then:
 
-    cat data/input
+<p>$$ \delta(e,f) = \frac{2 \times C(e,f)}{C(e) + C(f)} $$</p>
 
-Let's translate them!
+By default, the aligner guesses that $e$ and $f$ are aligned if
+$\delta(e,f) > 0.5$. Run it on 200 sentences:
 
-    python decode | tee output.default
+    python align -n 200 > dice200.out
 
-The `decode` program translates the contents of `data/input` and writes the
-result to the terminal and to the file `output`. It translates using a 
-_phrase-based_ translation model: a model that replaces sequences
-of French words with sequences of English words.[^1]
-The replacement must be one-to-one and every input word must be accounted
-for by a single phrase. Our model makes the 
-simplifying assumption that segmentation and ordering
-probabilities are uniform across all sentences, hence constant.
-This means that $p(\textbf{e},\textbf{a} \mid \textbf{f})$ is proportional to
-the product of the n-gram probabilities in $p_{\textrm{LM}}(\textbf{e})$
-and the phrase translation probabilities in $p_{\textrm{TM}}(\textbf{f},\textbf{a} \mid \textbf{e})$. 
-In phrase-based translation, the output
-sequence can be permuted, but the default decoder does not do this.[^2] We'll discuss
-the model and the decoding algorithm in more detail below.
+For each sentence, it generates pairs of numbers on a line, one per 
+alignment link. For our example alignment above, this would be:
 
-[^1]: the machine translation jargon for a sequence of words is _phrase_, but these aren't phrases in any linguistic theory---they can be any sequence of words in the sentence.
+    0-0 1-1 2-2 3-2 5-5 6-6 6-7 6-8 7-9
 
-[^2]: Technically, this makes the default decoder a _hidden semi-Markov model_
+How accurate are the alignments we just produced? To find out, let's compare 
+them with human alignments of the first 150 sentences. To account for 
+the fact that humans don't always agree on word alignment, we
+obtained alignments from two different annotators and distinguished two types
+of alignments: _sure_ alignments are those that both annotators agreed on, 
+while _possible_ alignments are those that were produced by one annotator,
+but not the other. 
 
-You can 
-probably get the gist of the Canadian senator's complaint 
-from this translation, but it isn't very readable. There are a 
-couple of possible explanations for this:
+Our measures will include <em>precision</em>, the percentage of guessed alignments 
+that are correct; _recall_, the percentage of human alignments that are 
+guessed; and [_alignment error rate_](http://aclweb.org/anthology/P/P00/P00-1056.pdf)
+(AER), which incorporates both precision and recall. For precision and recall, 
+higher is better, while for AER, lower is better.
+Possible alignments are counted for precision, but not
+recall.
 
-1. Our model of $p(\textbf{e} \mid \textbf{f})$ gives high probability to bad translations. This is called *model error*.
-1. Our model is good but our decoder fails to find $\arg \max_{\textbf{e}} p(\textbf{e} \mid \textbf{f})$. This is called *search error*.
+To compute precision, recall, and AER, run:
 
-How can we tell which problem is the culprit?[^3] One way
-would be to solve problem 2, a purely computational 
-problem. If we do and the resulting translations are good, then our work
-is finished. If the resulting translations are still poor, then we at least know
-that we should focus on creating better models. For this homework, we 
-will focus only on problem 2. (But don't worry, we'll revisit problem 1 
-in the next homework.)
+    python score-alignments < dice200.out
 
-[^3]: Sometimes these problem combine to create a [*fortuitous search error*](https://www.aclweb.org/anthology/P/P01/P01-1030.pdf), where inexact search finds a better translation than the one preferred by a poor model. We will not try to cause fortuitous search errors!
+In addition to these numbers, you'll also see the guessed, sure, and probable
+alignments. The guessed alignments are terrible! They're so noisy that it's
+difficult to see what the human alignment look like. You can look at the 
+human alignments without this noise by feeding empty alignments to
+`score-alignments`:
 
-If we're going to improve search so that we can find translations with
-higher probability, we need to measure the probability of the translations
-that our decoder finds. You can compute a value that is proportional to
-$p(\textbf{e} \mid \textbf{f})$  using `compute-model-score`.
+    yes "" | head -150 | python score-alignments
 
-    python compute-model-score < output.default
+__Question 1.__ What regularities do you observe in the human alignments?
 
-It will take a few minutes. Make a cup of tea.
+Do you think the automatic alignments will improve if you use more data?
+Try it:
 
-The `compute-model-score` program computes the probability of the decoder's output
-according to the model. It does this by summing the probabilities of all 
-possible alignments that the model could have used to 
-generate the English from the French, including translations
-that permute the phrases. That is, for each input $\textbf{f}$
-and output $\textbf{e}$ it exactly computes:
+    python align -n 2000 | python score-alignments -n 0
 
-<p class="text-center">
-$$\log \left( \sum_{\textbf{a}} p_{\textrm{TM}}(\textbf{f},\textbf{a} \mid \textbf{e}) \times p_{\textrm{LM}}(\textbf{e}) \right)$$
-</p>
+__Question 2.__ What happens when you use different amounts of data? Why do
+you think this happens?
 
-This value is proportional to $p(\textbf{e} \mid \textbf{f})$ up to
-a constant $\frac{1}{p(\textbf{f})}$. In general it is intractable to
-compute this sum, and if you inspect the code you'll find that the 
-implementation uses an exponential-time algorithm. But exponential worst
-case is a loose upper bound for this computation, and for these particular 
-instances the sum will only take a few minutes.
-It is easier to do this than it is to find the optimal 
-translation. 
+__Question 3.__ Vary the threshold using the <code>-t</code> option to <code>score-alignments</code>. 
+How are precision, recall, and AER affected?
 
-I highly recommend that you look at 
-[the code](https://github.com/achimr/dreamt-gt/blob/master/decoder/compute-model-score) for `compute-model-score`.
-It uses an unpruned exact dynamic program to compute the sum, so it may give 
-you some hints about how to do the homework! It also contains
-some useful utility functions to 
-[add probabilities in logarithmic space](https://github.com/achimr/dreamt-gt/blob/master/decoder/compute-model-score#L16) 
-and [manipulate bitmaps](https://github.com/achimr/dreamt-gt/blob/master/decoder/compute-model-score#L8).
+__Question 4.__ Do the automatic alignments reflect the regularities you
+observed in the human alignments? If they don't, how do they differ?
 
-Now let's turn our attention to the decoder you've been given.
-It generates the most probable translations 
-that it can find, but it uses three common approximations that
-can cause search error. 
 
-__The first approximation__ of our decoder is 
-the _Viterbi approximation_. Instead of computing the intractable sum over
-all alignments for each sentence, it seeks the best 
-single alignment and uses the corresponding translation.
+Baseline: IBM Model 1
+---------------------
 
-<p class="text-center">
-$$\begin{align*} \textbf{e}^* &= \arg \max_{\textbf{e}} \log\left( \sum_{\textbf{a}} p_{\textrm{TM}}(\textbf{f},\textbf{a} \mid \textbf{e}) \times p_{\textrm{LM}}(\textbf{e})\right) \\ &\approx \arg \max_{\textbf{e}} \log\left( \max_{\textbf{a}} p_{\textrm{TM}}(\textbf{f},\textbf{a} \mid \textbf{e}) \times p_{\textrm{LM}}(\textbf{e})\right) \end{align*}$$
-</p>
+Your challenge is to improve the alignment error rate as much as possible. 
+It shouldn't be hard: while our intuition about the coocurrence of words 
+makes our aligner better than chance, it is still very crude. Among other 
+problems, you may have noticed that some words tend to spuriously align to 
+many other words in the translation. Perhaps you could add some heuristics 
+to the Dice aligner to solve this. We will use probability, which gives 
+us powerful tools to reason about data. Specifically, we will use IBM 
+Model 1, which you must implement, examine, and extend.
+IBM Model 1 is a *word-to-word* or *lexical* translation model. 
+It has only one set of parameters: a
+conditional probability $t(f|e)$ for every foreign word 
+$f$ and English word $e$ that cooccur in at least one sentence. 
 
-This approximation vastly simplifies the search problem,
-since as we've already discussed, computing the sum for even a 
-single $\mathbf{e}$ can take exponential time. Computing sums for an 
-exponential number of outputs is doubly exponential (that's bad).
+Pick a translation pair from the data ${\mathcal{D}}$. Let the German
+sentence be $\mathbf{f} = f_1 \ldots f_I$, where $f_i$ is the
+$i$th word of $\mathbf{f}$. The English
+sentence is $\mathbf{e} = e_1 \ldots e_J$. Now we make a big 
+assumption: that this pair of sentences exists
+because someone translated the English into German following a simple
+procedure. First, the translator chose the length of the German sentence based
+on the length of the English sentence. Second, for each position in
+the German sentence, the translator chose a word $e$ at random from
+the English sentence, and then translated it to foreign word $f$
+according to the translation probability $t(f|e)$. 
 
-__The second approximation__ of our decoder is that it 
-translates French phrases into English without
-changing their order. So, it only reorders words  if 
-the reordering has been memorized as a phrase pair.
-For example, in the first sentence, we see that
-_<span class="text text-primary">mardi</span>
-<span class="text text-danger">dernier</span>_
-is correctly translated as
-_<span class="text text-danger">last</span>
-<span class="text text-primary">Tuesday</span>_.
+This means that we can represent an alignment $\textbf{a}$
+of the foreign words by: $\textbf{a} = a_1 \ldots a_I$. There
+is one random variable $a_i$ for each foreign word $f_i$, and
+each $a_i$ must take value in the range $1,...,J$, 
+indicating the chosen English word.[^1] Hence we obtain the following
+model:
 
-    head -1 output.default
+[^1]: In some versions of this story, $a_i$ is allowed to be $0$, which means the translator plucked the German word from thin air rather than translating any English word. We call this *null* alignment.
 
-If we consult `data/tm`, we will find that this happens because the model
-has memorized the phrase
-translation `mardi dernier ||| last Tuesday`. 
+<p>$$ \Pr(\mathbf{f}, \textbf{a}|\mathbf{e}) = \ell(I|J) \prod_{i=1}^I
+c(a_i|J) \cdot t(f_i|e_{a_i})$$</p>
 
-    grep "mardi dernier" data/tm
+Here, parameter $\ell(I|J)$ is the probability of producing
+a German sentence of length $I$ from an English sentence of length
+$J$, and $c(a_i=j|J)$ is the probability of choosing the $j$th
+English word. We have assumed that English words are chosen at random 
+from a uniform distribution, so $c(a_i=j|J) = \frac{1}{J}$.
+Take for example a three-word German sentence ($I = 3$) aligned
+to a three-word English sentence ($J = 3$).  If the alignment
+$\textbf{a} = (1,3,2)$, that is, $a_1 = 1$, $a_2 = 3$, and
+$a_3 = 2$ we can write the probability of this sentence pair 
+with this alignment as:
 
-But in the second sentence, we see that 
-_<span class="text text-danger">Comit&eacute; de</span> 
-<span class="text text-primary">s&eacute;lection</span>_
-is translated as 
-_<span class="text text-danger">committee</span> 
-<span class="text text-primary">selection</span>_,
-rather than the more fluent
-_<span class="text text-primary">selection</span>
-<span class="text text-danger">committee</span>_. 
-To show that this is a search problem rather than
-a modeling problem, we can generate the latter output
-by hand and check that the model really prefers it.
+<p>$$\Pr(\mathbf{f}, \textbf{a}|\mathbf{e}) = \ell(3|3) 
+\cdot \left(\frac{1}{3}\right)^3 t(f_1|e_1)
+\cdot t(f_2|e_3) \cdot t(f_3|e_2)$$</p>
 
-    head -2 data/input | tail -1 > example
-    python decode -i example | python compute-model-score -i example
-    echo a selection committee was achievement . | python compute-model-score -i example
+If you are familiar with sequence tagging problems---like part-of-speech
+tagging---you might recognize this as a tagging problem in disguise:
+the goal is simply to tag each German word with an English word! The model
+we've just described is a zero-order Markov model in which the tag of each
+word depends only on the prior probability of the tag ($c$) and
+the probability of choosing the word given the tag ($t$). But there are
+some important differences. A major one is that, unlike in part-of-speech tagging, 
+the set of tags changes in each training example!
 
-The scores are reported as log-probabilities, and higher
-scores (with lower absolute value) are better. We 
-see that the model prefers
-_<span class="text text-primary">selection</span>
-<span class="text text-danger">committee</span>_, 
-but the decoder does not consider this word order
-since it has never memorized this phrase pair.
+A more important difference is that we aren't actually given any tagged
+training examples, so we can't use supervised learning. So how do we set
+parameters $t(f_3|e_2)$? Let's think about this for a second. We 
+have some data that we assume was generated by our model, and the
+probability of this data under the model is a function of the parameters
+(called the _likelihood_). So a reasonable solution is to choose 
+parameters that maximize this function---the _maximum likelihood_
+estimate. If we have $S$ sentence pairs, where $\mathbf{f}^{(s)}$,
+$\mathbf{e}^{(s)}$, and $\mathbf{a}^{(s)}$ are the German, English,
+and alignment variables of the $s$th pair (respectively), we want
+to choose parameters $\hat{t}$ according to this _objective function_:
 
-Not searching over permutations (reorderings) of the translated phrases is harmful because
-the decoder cannot find translations with higher model score, but it is 
-beneficial in one way, because admits a straightforward
-dynamic program, which we will now define under the simplifying assumption of
-a bigram language model (the default decoder uses a trigram language model). Let 
-$\mathbf{f} = f_1 ... f_I$ and, for each $f_i ... f_j$
-let $t(f_i ... f_j)$ denote its set of possible phrase translations. The 
-question our decoder must answer is: what is the most probable translation under
-our model, under the constraint that phrase translations are one-to-one, in the
-same order as the source, covering all source words exactly once? 
+<p>$$ \hat{t} = \arg\max_{t} \sum_{s=1}^S \log \Pr(\mathbf{f}^{(s)},\mathbf{a}^{(s)}|\mathbf{e}^{(s)}, t) $$</p>
 
-We called this translation $\mathbf{e}^*$ above, so let's continue to use 
-that notation. Although $\mathbf{e}^*$ must be chosen from a large set of
-translations, we'd like to decompose this choice into a smaller set of 
-decisions that factor with $p_{\textrm{TM}}(\textbf{f},\textbf{a}\mid{} \textbf{e})$
-and $p_{\textrm{LM}}(\textbf{e})$. Since our language model must define 
-a stop probability, we know that the best translation must contain a bigram
-probability of the $STOP$ symbol, conditioned on its final word. Let's
-use $h(j,e)$ to denote the highest probability sequence that translates $j$ words
-of the input and ends in word $e$ from English vocabulary $V_E$, 
-and $p(h(j,e))$ to denote the product of the translation model probability
-for all phrases used and the language model probability for the entire
-sequence up to word $e$. For $h(j,e)$, this is the probability of the 
-full translation divided by the probability of the transition
-from $e$ to $STOP$, so we can define $\mathbf{e}^*$ this way:
+You will notice a small problem with this scheme: we weren't given the
+alignments, which are needed to compute the maximum likelihood estimate.
+The alignment $\mathbf{a}$ is a _latent variable_ (or, if you're feeling
+less charitable, a _nuisance variable_). But we can still
+maximize the data likelihood---we just maximize the probability of the
+_observed_ data by summing over all possible values of the latent variables.
 
-<p class="text-center">
-$$\textbf{e}^* = \arg\max_{h(I,e):e\in V_E} \log p(h(I,e)) + \log p_{\textrm{LM}}(STOP\mid e)$$
-</p>
+<p>$$
+\begin{eqnarray*}
+\Pr(\mathbf{f}|\mathbf{e}, t) & = & \sum_{\textbf{a}} \Pr(\mathbf{f}, \textbf{a}|\mathbf{e}, t) \\
+& = & \sum_{a_1=1}^J \cdots \sum_{a_I=1}^J  \ell(I|J) \prod_{i=1}^I c(a_i|J) \cdot t(f_i|e_{a_i}) \\
+&& \textrm{(this computes all possible alignments)} \\
+& = & C \prod_{i=1}^I \sum_{j=1}^J t(f_i|e_j) \\
+&& \textrm{(since the } \ell \textrm{ and } c \textrm{ terms don't depend on the alignment, we lump them into a constant } C)
+\end{eqnarray*}
+$$</p>
 
-This is a good start, because now we've defined $\mathbf{e}^*$ as a
-choice from among $V_E$ objects rather than an exponential number of 
-objects (as a practical matter, we'll only need to inspect $h(I,e)$ for 
-those $e$ that can actually appear in a valid translation of 
-$\mathbf{f}$, a much smaller set than $V_E$). But now we have a new 
-problem: how do we define $h(j,e)$? Since it is constructed from a 
-sequence of phrase translations, let's break it into two parts: a prefix
-that translates the words $f_1 ... f_i$ and the final English phrase, 
-which must be a translation of the French words $f_{i+1} ... f_j$ for 
-some position $0\leq i<j$. There are many possible choices for $i$, the
-translation of $f_1 ... f_i$ may end in many possible English words,
-and there may be many translations of $f_{i+1} ... f_j$. We must 
-maximize over all combinations of these choices:
+To perform this optimization we will use the _Expectation-Maximization_
+(EM) algorithm. A full explanation of this algorithm is lengthy, 
+but I expect you to understand what it does and how it works at least at
+the level described in your textbook and in 
+[this note](https://georgetown.instructure.com/files/1392842). In particular,
+you should be able to derive EM update equations for simple models, though
+I won't ask you to prove anything about it.
 
-<p class="text-center">
-$$\begin{align}h(j,e) = \arg\max_{h(i,e')e_1...e_ke:0\leq i<j,e'\in V_E,e_1...e_ke\in t(f_{i+1}...f_j)} & \log p(h(i,e')) + \log p_{\textrm{TM}}(f_{i+1}...f_j\mid e_1...e_ke) + \\& \log p_{\textrm{LM}}(e_1\mid e') + \sum_{k'=1}^{k-1} \log p_{\textrm{LM}}(e_{k'+1}\mid e_{k'}) + \\ & \log p_{\textrm{LM}}(e\mid e_k) \end{align}$$
-</p>
+In order to estimate the parameters $t(\cdot|\cdot)$
+we start with an initial estimate $t_0$ and modify it iteratively
+to get $t_1, t_2, \ldots$. The parameter updates are derived
+for each German word $f_i$ and English word $e_j$ as follows:
 
-All that is left is to define a base case:
+<p>$$t_k(f_i|e_j) = \sum_{s=1}^N \sum_{(f_i, e_j) \in (\textbf{f}^{(s)}, \textbf{e}^{(s)})} \frac{ \mathbb{E}_{t_{k-1}}(f_i, e_j, \textbf{f}^{(s)}, \textbf{e}^{(s)}) }{\mathbb{E}_{t_{k-1}} (e_j, \textbf{f}^{(s)}, \textbf{e}^{(s)}) }$$</p>
 
-<p class="text-center">
-$$h(0,e) = \left\{ \begin{array}{ll} 1 && \textrm{if }e=START\\ 0 && \textrm{otherwise} \end{array} \right.$$
-</p>
+These counts are *expected counts* over all possible alignments,
+and each alignment has a probability computed using $t_{k-1}$.
 
-Using induction, convince yourself that this recursion defines
-every highest-probability _hypothesis_ (or partial translation) 
-of the sentence, because it recursively
-considers all possible ways of reaching that hypothesis. By extension, it must
-also define the highest-probability translation $\mathbf{e}^*$.
+Once we have trained an alignment model, we want to find
+the most probable  alignment for a given translation pair.
 
-To implement this dynamic program, we actually compute the recursion left-to-right,
-from smaller to larger values of $j$. In this way, we always have all the information
-we need when computing $h(j,e)$. As a practical matter, the way we do this
-is to ask, for each $h(i,e')$, which larger hypothesis $h(j,e)$ it might
-be a maximizing prefix to, and then compute the probability of $h(j,e)$ 
-as if this were true. If the newly computed probability is indeed higher
-than any probability we previously computed for $h(j,e)$, we store it
-with $h(j,e)$ and make $h(i,e')$ its predecessor. The MT jargon term
-for this is _recombination_.
+<p>$$ 
+\hat{\textbf{a}} = \arg\max_{\textbf{a}} \Pr(\textbf{a}|\textbf{e}, \textbf{f})
+$$</p>
 
-The form of the recursion gives us a strong hint about the upper bound 
-complexity of the dynamic program, since if we consider all possible
-assignments of $i$, $j$, $e$, $e'$, and $e_1,...,e_k$ in the central
-recursion, we can deduce that complexity is $\mathcal{O}(I^2)$
-if phrases can be arbitrarily long, and $\mathcal{O}(IK)$ if phrases
-have a maximum length $K$ (which is true in the default decoder and most
-practical implementations). However there is a large factor (constant in the
-input length) due to language model computations.
+The best alignment to a target sentence in our simple baseline model
+is obtained by finding the best alignment for each word in
+the source sentence independently of the other words. For each
+foreign word $f_i$ in the source sentence the best alignment is
+given by:
 
-__The third approximation__ of our decoder is pruning: as it constructs 
-the dynamic program from left to right, for each source position $j$ it remembers 
-only the highest probability values for $h(j,e)$ (over all $e\in V_E$) 
-and discards the rest. The decoder uses _histogram pruning_, in which at
-most $s$ hypotheses are retained at each position $j$. By default it
-only keeps 1 hypothesis. Pruning introduces
-approximation into the search, because a hypothesis leading to the overall
-best translation may be pruned during search. At each position $j$, we
-keep the $s$ best hypotheses in a _stack_ (the unfortunate MT jargon
-term for a priority queue).
+<p>$$ 
+\hat{a_i} = \arg\max_{a_i} t(f_i|e_{a_i}) 
+$$</p>
 
-The default decoder also implements another common form of pruning, which
-is that it only considers the $k$ most probable translations for each
-phrase. By default, $k=1$.
+If your Model 1 implementation is correct, it will give you
+much better alignments than the Dice aligner. They are still far
+from perfect, though. 
 
-To see all of this in code, start at 
-[line 33](https://github.com/achimr/dreamt-gt/blob/master/decoder/decode#L33)
-of the default decoder, which closely follows the pseudocode in your textbook
-(Figure 6.6 on p. 165).
+I strongly recommend that you work through the derivation of the full
+algorithm from first principles, described in much more detail in 
+[this note](https://georgetown.instructure.com/files/1392842). This is to practice writing
+down a model, deriving simple estimators from the model, and implementing
+those estimators as code. 
 
-* Lines 33-35 define data structures: we have a hypothesis data structure 
-  that summarizes a partial English translation of the French sentence, 
-  and a set of n+1 stacks. `stack[i]` will eventually hold different 
-  hypotheses about ways to translate exactly $i$ words of the French. The 
-  hypotheses in a stack are indexed by their language model state, which is 
-  the only information needed to correctly score their extensions. In particular,
-  notice that the hypothesis _does not_ store $j$, the number of words
-  translated, because in the default decoder we can determine that from the
-  stack on which we found the hypothesis. This is not true in more advanced
-  dynamic programs, so you may need to revisit this implementation decision
-  when you get to later parts of the homework.
-* Line 36 places an initial hypothesis ($h(0,START)$) in the 0th stack. Its LM state is 
-  simply the $START$ token. (Fig 6.6 line 1).
-* At line 37, we iterate over the stacks, processing each in turn. In other 
-  words, we process the hypotheses in order of the number of French words 
-  they have translated. (Fig 6.6 line 2).
-* At line 38, we iterate over all hypotheses in the stack (Fig 6.6 line 3). 
-  Prior to this, we sort the hypotheses according the LM score and then 
-  prune the stack, leaving only the top $s$ hypotheses (Fig 6.6 line 9). 
-* Lines 39-41 iterate over all possible phrases that we might choose to 
-  extend the current hypothesis (Fig 6.6 line 4-5). Since the default 
-  decoder is monotonic, we know that all hypotheses in stack $i$ represent 
-  translations of the first $i$ words. So we only look at translations 
-  covering the sequence of words starting at position $i+1$ and going to 
-  any position $j$. But note that the strings in our discussion have
-  been 1-indexed while those in python are 0-indexed.
-* Lines 42-48 create a new hypothesis that extend the current hypothesis 
-  by appending the selected phrase translation (Fig 6.6 line 6). This 
-  requires incorporating the phrase translation probability (line 42) and 
-  the language model score of the new words, including possibly the 
-  end-of-sentence token if the new hypothesis will represent a translation 
-  of the entire sentence (lines 43-47).
-* Lines 49-50 add the new hypothesis to a stack (Fig 6.6 line 7). Again, 
-  since we're translating monotonically, we can just put it in stack $j$. 
-  Notice that in the second condition of line 49 we also do recombination: 
-  if there was already a hypothesis with the same LM state but lower 
-  probability, we replace it with the newly created one, which represents 
-  a higher-probability path with identical completions (Fig 6.6 line 8).
-* Lines 51-54 print the best hypothesis. First, we choose the best 
-  hypothesis in the final stack, which is simply the one with the highest 
-  probability (line 51). Then we trace back through the sequence of 
-  hypotheses that lead to it, and print out the corresponding English words 
-  in order using the recursive function `extract_english` (this is not a 
-  closure. I just included it at this point to keep all of the logic in 
-  one place, in the interest of clarity). You probably won't need to 
-  modify this bit of code.
+You are required to implement IBM Model 1. This requires
+a very modest amount of code: Adam Lopez's implementation is one line shorter than the 
+Dice aligner! You are not required to use the python baseline (though that
+will be easiest), but your solution must be implemented in Python. 
 
-Now that we've seen how all of this works, it's time to experiment with
-some of the pruning parameters, and see how they trade search accuracy
-for speed.
+How will you know if your implementation is correct? One way is to sanity
+check it by comparing with the results of a known reference implementation. Adam Lopez implemented Model 1 according to [this note](https://georgetown.instructure.com/files/1392842). His
+implementation:
 
-    time python decode > output.default
-    python compute-model-score < output.default
-    time python decode -s 100 -k 10 > output.s=100.k=10
-    python compute-model-score < output.s=100.k=10
-    vimdiff output.default output.s=100.k=10
-    
-(Type `:q:q` to exit vimdiff; on Windows use `gvim -d` instead of `vimdiff`).
+* Learns a model of German sentences conditioned on English sentences.
+* Does not model null alignments---every German word must align to exactly one English word.
+* Initializes word translation probabilities uniformly.
+* Is about the same length as the Dice aligner (38 LOC).
 
-**Question 1 [20 points]**: Experiment with different combinations of values 
-for the stack size parameter `-s` and the maximum number of translations `-k`, 
-until you can no longer obtain any improvements. How do changes in these 
-parameters affect the resulting log-probabilities? How do they affect speed?
-How do they affect the translations?
+When we run this implementation for 5 iterations on the full data, I get 
+these results:
 
-Baseline: Local Reordering
---------------------------
+    Precision = 0.545814
+    Recall = 0.588443
+    AER = 0.434428
 
-Your task is to __find the most probable English translation__.
-Our model assumes that any segmentation of the French sentence into
-phrases followed by a one-for-one substitution and permutation of
-those phrases is a valid translation.
+Don't worry about reproducing these numbers exactly. If your results differ
+after three or four decimal places, you probably have a correct implementation.
+Welcome to the joy of programming with stochastic models. 
 
-The baseline approach that I want you to explore is one with a very limited
-amount of reordering: the ability to swap translations of adjacent phrases. More precisely,
-if $\vec{e}_1$ is the translation of French words $f_i...f_k$ and $\vec{e}_2$
-is the translation of French words $f_{k+1} ... f_j$, then your output
-can contain them in the order $\vec{e}_2\vec{e}_1$. Notice that since phrases
-can be swapped only if they are translations of adjacent phrases, further
-swaps involving $\vec{e}_1$ and $\vec{e}_2$ are no longer possible, because
-the right neighbour of $\vec{e}_1$ was not adjacent to it in the original
-order, likewise the left neighbour of $\vec{e}_2$. In other words, we
-cannot permute sequences of three or more phrases under this definition of
-reordering.
+__Question 5.__ The theory behind expectation maximization guarantees that
+the data likelihood increases after each iteration. Plot the data likelihood
+for some amount of data over ten iterations. You will need to do this 
+in logspace to avoid numerical underflow. How does likelihood change? Does 
+it appear to converge? Now compare this with the AER of the model after
+each iteration. How do data likelihood and AER relate?
 
-Your new decoder will now contain the correct translation
-for the _<span class="text text-primary">selection</span>
-<span class="text text-danger">committee</span>_ example in its
-search space, though it may discover some other, even more probable
-translation, so you may not get exactly this output.
+__Question 6.__: Choose two English words from the data: a very frequent word,
+and an infrequent word. Plot their translation distributions. What do you 
+observe? How do the shapes of these distributions affect the resulting 
+alignments?
 
-**Question 2 [20 points]**: Define a new dynamic program for the search space
-described above. You may find it helpful to use the notation for the default
-search decoder, but you are free to use a different notation as long as you
-describe its meaning. 
+__Question 7.__: Choose two English words from the data that are morphological
+variants of each other (e.g. _house_ and _houses_) and plot their translation
+distributions. Why are they similar or different? Does this seem sensible?
 
-**HINT**: You can start as above, by assuming $h(I,e)$ is the highest-probability
-translation of $f_1...f_I$. Think carefully about all possible ways of 
-reaching this translation. You may (recursively) discover some new cases that you'll also
-have to reason about until you have a complete system.
+__Question 8.__: Do your Model 1 alignments reflect the regularities you
+observed in the human alignments? If they don't, how do they differ?
 
-**HINT**: The more precise your description, the more easily you'll be
-able to translate it into code.
-
-**Question 3 [10 points]**: What is the computational complexity of your dynamic program?
-
-**Question 4 [5 points]**: Define a mapping from hypothesis objects of
-your new dynamic program to stacks. In other words: which stack should a
-hypothesis be placed on?
-
-**Question 5 [15 points]**: Implement your new dynamic program.
-
-**HINT**: If you adapt the default decoder, this requires a relatively 
-small amount of code; my implementation is about 15 lines longer than
-the default decoder. You will need to change the hypothesis object 
-according to the new dynamic program that you've written, and you may even 
-need multiple types of hypothesis objects. You will also need to think 
-carefully about which stack to place new hypothesis objects in. If you've
-carefully answered the questions above, you should have a good idea about
-how to do this.
-
-**Question 6 [10 points]**: Using your new decoder, experiment with different 
-combinations of values for the stack size parameter `-s` and the maximum 
-number of translations `-k`, until you can no longer obtain any 
-improvements. How do changes in these parameters affect the resulting 
-log-probabilities? How do they affect speed? How do they affect the translations?
 
 The Challenge
 -------------
 
-**Question 7 [20 points]**: Implementing a decoder that can swap
-adjacent phrases and answering the accompanying questions is a good
-start to understanding decoding.
-But swapping adjacent phrases will not get you anywhere close to the most
-probable translation according to this model. To get 
-fully understand decoding, you __must__ additionally experiment with another decoding algorithm.
-Any permutation of phrases is a valid translation, so you might attempt to
-search over all or some part of this larger space. (Correctly described dynamic 
-programs without an implementation will get you part of the way there). This search is
-NP-Hard, so it will not be easy. You 
-can trade efficiency for search effectiveness
-by implementing histogram pruning or threshold pruning, or by using 
-reordering limits as described in the textbook (Chapter 6). You might widen
-the scope of the search by considering local permutations of three phrases,
-rather than two. Or, you might
-consider implementing other approaches to solving the combinatorial
-optimization problem implied by the Viterbi approximation:
+__Question 9.__ Developing a Model 1 aligner and answering questions 1 through 8 
+will help you understand alignment. But if you answered the questions in full
+you will have noticed some serious problems with Model 1. By thinking
+carefully about these problems, you should be able to develop better 
+probabilistic models of alignment. How well can you do?
+To really understand alignment, you must experiment with at least one 
+well-motivated extension of Model 1 and report the results. Your report
+should concisely state the problem you tried to solve, how you modeled it, and
+the results you obtained on the data. You are **not required** to do better than 
+Model 1, only to hypothesize and experiment in good faith. Failed experiments
+are a necessary component of good problem-solving.
 
-* [Implement a greedy decoder](http://www.iro.umontreal.ca/~felipe/bib2webV0.81/cv/papers/paper-tmi-2007.pdf).
-* [Use chart parsing to search over many permutations in polynomial time](http://aclweb.org/anthology/C/C04/C04-1030.pdf).
-* [Use a traveling salesman problem (TSP) solver](http://aclweb.org/anthology/P/P09/P09-1038.pdf).
-* [Use finite-state algorithms](http://mi.eng.cam.ac.uk/~wjb31/ppubs/ttmjnle.pdf).
-* [Use Lagrangian relaxation](http://aclweb.org/anthology/D/D13/D13-1022.pdf).
-* [Use integer linear programming](http://aclweb.org/anthology/N/N09/N09-2002.pdf).
-* [Use A* search](http://aclweb.org/anthology/W/W01/W01-1408.pdf).
+Here are some ideas:
 
-These methods all attempt to approximate or solve the Viterbi approximation to decoding.
-You can also try to approximate $p(\textbf{e} \mid \textbf{f})$ directly.
+* Implement [a model that prefers to align words close to the diagonal](http://aclweb.org/anthology/N/N13/N13-1073.pdf).
+* Implement an [HMM alignment model](http://aclweb.org/anthology-new/C/C96/C96-2141.pdf).
+* Implement [a morphologically-aware alignment model](http://aclweb.org/anthology/N/N13/N13-1140.pdf).
+* [Use *maximum a posteriori* inference under a Bayesian prior](http://aclweb.org/anthology/P/P11/P11-2032.pdf).
+* Train a German-English model and an English-German model and [combine their predictions](http://aclweb.org/anthology-new/N/N06/N06-1014.pdf).
+* Train a [supervised discriminative alignment model](http://aclweb.org/anthology-new/P/P06/P06-1009.pdf) on the annotated development set.
+* Train an [unsupervised discriminative alignment model](http://aclweb.org/anthology-new/P/P11/P11-1042.pdf).
+* Seek out additional [inspiration](http://scholar.google.com/scholar?q=word+alignment).
 
-* [Change the decision function](http://anthology.aclweb.org/N/N04/N04-1022.pdf) to minimize Bayes risk, which explicitly sums over translations.
-* [Use variational algorithms](http://aclweb.org/anthology//P/P09/P09-1067.pdf).
-* [Use Markov chain Monte Carlo algorithms](http://aclweb.org/anthology//W/W09/W09-1114.pdf).
+But the sky's the limit! Alignment is not a solved problem, and you are 
+welcome to invent your own solution.
 
-But the sky's the limit! There are many ways to decode.
-You can try anything you want.
+Resources
+---------
+
+In completing this homework, you may want to consult other descriptions of
+the material if they are clearer to you. Here are a few:
+
+* [Adam Lopez's notes on Model 1](https://georgetown.instructure.com/files/1392842)
+* [Statistical Machine Translation: IBM Models 1 and 2](http://www.cs.columbia.edu/~mcollins/courses/nlp2011/notes/ibm12.pdf), Collins.
+* [Statistical MT Tutorial Workbook](http://www.isi.edu/natural-language/mt/wkbk.rtf), Knight.
+* [Model 1 EM example](http://people.cs.umass.edu/~brenocon/inlp2014/notes/model1_em.html), O'Connor.
 
 ### Acknowledgements
 
-This homework was developed by
+This challenge was developed by
 [Adam Lopez](https://alopez.github.io/)
 in collaboration with
 [Chris Callison-Burch](http://www.cis.upenn.edu/~ccb/),
-[Chris Dyer](http://www.cs.cmu.edu/~cdyer), and
-[Matt Post](http://cs.jhu.edu/~post/).
+[John DeNero](http://www.denero.org/),
+[Chris Dyer](http://www.cs.cmu.edu/~cdyer),
+[Philipp Koehn](http://homepages.inf.ed.ac.uk/pkoehn/),
+[Matt Post](http://cs.jhu.edu/~post/), and
+[Anoop Sarkar](http://www.cs.sfu.ca/~anoop/).
 
 
-### Footnotes
+### Footnotes 
