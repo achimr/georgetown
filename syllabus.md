@@ -87,7 +87,7 @@ We will use the textbook Statistical Machine Translation by Philipp
 Koehn (Cambridge University Press, ISBN-10: 0521874157, ISBN-13:
 978-0521874151) which is available from the
 [Georgetown Library](https://www.library.georgetown.edu/)
-through the Georgetown University library (identified in the assigned
+(identified in the assigned
 reading as \"Koehn SMT\"). We will also use book Neural Machine
 Translation (3rd draft) by Philipp Koehn available
 [here](http://mt-class.org/jhu/assets/nmt-book.pdf) (identified in the
